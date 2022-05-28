@@ -1,0 +1,54 @@
+,Unnamed: 0,Unnamed: 1,Unnamed: 2,Unnamed: 3,Unnamed: 4,Pontuação
+0,CRITÉRIO 1,,,,Nota,
+1,,,,,,máxima
+2,,,1.1,Curso superior completo em,"1,0 por",
+3,Aderência da,,,qualquer área do conhecimento.,formação,"2,0"
+4,formação do,,,,,
+5,,,1.2,"Curso, com certificado, em áreas",,
+6,proponente aos,,,,"0,5 por",
+7,,,,relacionadas à inovação,,"4,0"
+8,requisitos da,,,,curso,
+9,vaga,,1.3,Certificação em gerenciamento,"2,0 por","6,0"
+10,,,,"de projetos, ou métodos ágeis.",formação,
+11,,,1.4,Possuir pós-graduação latu sensu,,
+12,,,,concluída com carga horária mínima,"2,0 por","4,0"
+13,,,,de 360 horas em áreas,formação,
+14,,,,relacionadas à inovação,,
+15,,,1.5,Possuir Mestrado concluído em,,
+16,,,,,"2,0 por",
+17,,,,áreas relacionadas à inovação,,"2,0"
+18,,,,,formação,
+19,,,1.6,Possuir Doutorado concluído em,,
+20,,,,,"2,0 por",
+21,,,,áreas relacionadas à inovação,,"2,0"
+22,,,,,formação,
+23,,,,,,
+24,,,,,,Pontuação máxima
+25,CRITÉRIO 2,,,,Nota,
+26,,,2.1,Atuação na condução de projetos de,"1,0 ponto a",
+27,,,,promoção ou implementação de,cada seis,
+28,,,,inovação,meses,"20,0"
+29,,,,,completos,
+30,,,,,,
+31,,,2.2,Exercício profissional diretamente,"1,0 ponto a",
+32,Aderência da,,,relacionado com áreas de,cada seis,
+33,experiência do,,,"inovação, conforme item9.5",meses,"20,0"
+34,proponente aos,,,,completos,
+35,requisitos da,,2.3,Atuação com ou sem vínculo,"1,0 ponto a",
+36,vaga,,,"empregatício permanente, em nível",cada seis,
+37,,,,"superior, em instituição gestora de",meses,"10,0"
+38,,,,"inovação, conforme definição no",completos,
+39,,,,item 9.5,,
+40,,,2.4,Exercício profissional diretamente,"1,0 ponto a",
+41,,,,relacionado com aárea de gestão,cada seis,"10,0"
+42,,,,ou planejamento empresarial,meses,
+43,,,,,completos,
+44,,,2.5,Atuação com ou sem vínculo,"1,0 ponto a",
+45,,,,"empregatício permanente, em",cada seis,
+46,,,,consultoria na área de gestão ou,meses,"10,0"
+47,,,,planejamento empresarial e,completos,
+48,,,,inovação,,
+49,,,2.6,Atuação como instrutor em,"1,0 ponto a",
+50,,,,"Disciplinas de Inovação,conforme",cada seis,
+51,,,,definição do item 9.5,meses,"10,0"
+52,,,,,completos,
