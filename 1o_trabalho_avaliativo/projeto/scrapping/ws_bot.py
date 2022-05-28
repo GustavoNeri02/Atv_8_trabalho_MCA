@@ -5,7 +5,7 @@ from .pdf_reader import PdfReader
 
 import Constants as const
 
-import os, time
+import os
 import pandas as pd
 
 
@@ -124,7 +124,7 @@ class WsBot(webdriver.Edge):
         pagination_element = self.find_element(By.XPATH, '//div[@class="pagination"]')
         static_elements = pagination_element.find_elements(By.XPATH, './/span') \
  \
-        # busca em elementos estáticos de paginação (span), pela referencia do indice 
+            # busca em elementos estáticos de paginação (span), pela referencia do indice
         #   da pagina em contexto (atual)
         ref_context = -1
         for page in static_elements:
@@ -185,7 +185,7 @@ class WsBot(webdriver.Edge):
 
         # indentificando os filtros
         page_contex_filter_name = 'Chamada Pública'
-        link_presentation_filter_name ='Chamada Pública'
+        link_presentation_filter_name = 'Chamada Pública'
 
         # [undefined:index,'page_context', 'link_presentation', 'link_value']
         for i in range(0, data_source.index.size):
@@ -195,7 +195,7 @@ class WsBot(webdriver.Edge):
                 filter_dataframe.loc[filter_dataframe.index.size] = linha
 
         self.__save_df_to_excel_file(filter_dataframe, './filtered_data', 0)
-        #print(filter_dataframe.to_string())
+        # print(filter_dataframe.to_string())
         print(f'filtered {filter_dataframe.index.size} from {data_source.index.size}')
 
     # require_one = [fase, evento, atividade] and require_exact = [data]
