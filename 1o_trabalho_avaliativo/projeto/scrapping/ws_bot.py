@@ -198,13 +198,42 @@ class WsBot(webdriver.Edge):
         #print(filter_dataframe.to_string())
         print(f'filtered {filter_dataframe.index.size} from {data_source.index.size}')
 
+    # require_one = [fase, evento, atividade] and require_exact = [data]
+    def filtering_frame(self, frame: pd.DataFrame):
+        valid = False
+        if frame.columns.__str__().lower().__contains__(("atividade" or "fase" or "evento") and "data"):
+            valid = True
+
+        if frame.index.size > 0 and not valid :
+            if frame.iloc[0].to_string().lower().__contains__(("atividade" or "fase" or "evento") and "data"):
+                valid = True
+
+        return valid
+
+    def normalising_frame(self, frame: pd.DataFrame):
+        pass
 
     def extract_data(self, open_path):
         reader = PdfReader()
-        dataframe = pd.read_excel(open_path)
-        for i in range(0, 1):
-            dfs = reader.extract_tables(dataframe.iloc[i][2])
+        filtered_data = pd.read_excel(open_path)
 
-            for df in dfs[0]:
-                #print(f'dataframe: {df[0].head()}')
-                df[0].to_csv('csv_teste.csv')
+        length = 3  # len(filtered_data.index)
+        for iter_pdf in range(0, length):
+            elementos_df = reader.extract_tables(filtered_data.loc[iter_pdf][2])
+
+            # create directory
+            path = f'.\\scrapping\\csv_teste\\{iter_pdf}'
+            try:
+                os.mkdir(path)
+            except: pass
+
+            count_df = 0
+            for elemento_df in elementos_df:
+                print(f'info: {elemento_df[1]}')
+                print(f'dataframe: {elemento_df[0].head()}')
+
+                # save file in the correspondent directory
+                if self.filtering_frame(elemento_df[0]):
+                    elemento_df[0].to_csv(f'{path}\\{count_df}.csv')
+
+                count_df += 1
