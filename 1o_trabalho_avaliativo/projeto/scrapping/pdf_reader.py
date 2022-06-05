@@ -25,11 +25,17 @@ class PdfReader(object):
 
 
 if __name__ == '__main__':
-    reader = PdfReader()
+    def extract_data(open_path):
+        reader = PdfReader()
+        stracted_data = pd.read_excel(open_path)
 
-    file_path = 'http://www.fapeg.go.gov.br/wp-content/uploads/2018/01/CP_01_2018_PARTICIPACAO.pdf'
-    dfs = reader.extract_tables(file_path)
+        for i in range(0, 1):
+            elementos_df = reader.extract_tables(stracted_data.loc[i][2])
 
-    for element in dfs:
-        print(element[1])
-        print(element[0].head())
+            for elemento_df in elementos_df:
+                print(f'info: {elemento_df[1]}')
+                print(f'dataframe: {elemento_df[0].head()}')
+                elemento_df[0].to_csv('csv_teste.csv')
+
+    extract_data('./filtered_data.xlsx')
+
