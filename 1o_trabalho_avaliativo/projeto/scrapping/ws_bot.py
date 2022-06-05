@@ -1,12 +1,16 @@
+from code import interact
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+
+from scrapping.user_system import MenuContent, MenuSystem
 # import tabula
 from .pdf_reader import PdfReader
-
+from .table_organizer import TableOrganizer
 import Constants as const
 
 import os
 import pandas as pd
+import re
 
 
 class WsBot(webdriver.Edge):
@@ -122,8 +126,8 @@ class WsBot(webdriver.Edge):
     def __next_page_in_pagination(self):
         # obtem elemento de paginaçao e guarda referencia de elementos estáticos em paginação (span)
         pagination_element = self.find_element(By.XPATH, '//div[@class="pagination"]')
-        static_elements = pagination_element.find_elements(By.XPATH, './/span') \
- \
+        static_elements = pagination_element.find_elements(By.XPATH, './/span') 
+ 
             # busca em elementos estáticos de paginação (span), pela referencia do indice
         #   da pagina em contexto (atual)
         ref_context = -1
@@ -198,26 +202,78 @@ class WsBot(webdriver.Edge):
         # print(filter_dataframe.to_string())
         print(f'filtered {filter_dataframe.index.size} from {data_source.index.size}')
 
-    # require_one = [fase, evento, atividade] and require_exact = [data]
+    # Berifica se o data frame (a tabela) corresponde a uma tabela de "cronograma".
+    #   É necessário encontrar algumas correspondencias de coluna: 
+    #   > require_one of {fase, evento, atividade} and require_exact extrict {data}.
+    #   É necessário determinar quais corespondencias foram encontradas.
     def filtering_frame(self, frame: pd.DataFrame):
         valid = False
-        if frame.columns.__str__().lower().__contains__(("atividade" or "fase" or "evento") and "data"):
+        if frame.columns.__str__().lower().__contains__(("atividade") and "data"):
             valid = True
 
         if frame.index.size > 0 and not valid :
-            if frame.iloc[0].to_string().lower().__contains__(("atividade" or "fase" or "evento") and "data"):
+           if frame.iloc[0].to_string().lower().__contains__(("atividade") and "data"):
                 valid = True
 
         return valid
 
-    def normalising_frame(self, frame: pd.DataFrame):
-        pass
+    def __find_context_columns(self, table:pd.DataFrame) -> list():
+        self.require_one = ['atividade']
+        self.require_strict = ['data']
+        context_columns = [0, 0]
+        
+        columns = table.columns.__str__().lower()
+        has_require_one = list(map(columns.__contains__, self.require_one))
+        require_strict = list(map(columns.__contains__, self.require_strict))
+        
+        if not has_require_one.__contains__(True):
+            first_line = table.iloc[0].to_string().lower()
+            has_require_one = list(map(first_line.__contains__, self.require_one))
+            context_columns[0] = 1
+            
+        if not require_strict.__contains__(True):
+            first_line = table.iloc[0].to_string().lower()    
+            require_strict = list(map(first_line.__contains__, self.require_strict))
+            context_columns[1] = 1
+        
+        return context_columns
+
+
+    def normalising_frame(self, tables: list()):
+        to = TableOrganizer()
+        
+        resolve_columns = False
+        # realizar merge se mais de um frame da tabela
+        table = tables[0]
+        if len(tables) > 1:
+            for context_table in tables[1:]:
+                context_columns = self.__find_context_columns(table)
+                
+                if context_columns == [1, 1]:
+                    resolve_columns = True
+                
+                context_table = to.normalize_table_data(context_table, resolve_columns)
+                table = to.concatenate(table, context_table)
+                
+                resolve_columns = False
+        else:
+            context_columns = self.__find_context_columns(table)
+            
+            if context_columns == [1, 1]: # ! cenário limitado
+                resolve_columns = True
+            
+            table = to.normalize_table_data(table, resolve_columns)
+            
+        model_rows = to.normalize_table_rows(table.loc[:, table.columns], 0)
+        
+        return to.model_rows_to_df(table=table, form_row=model_rows['form_row'], columns=list(table.columns))
+        
 
     def extract_data(self, open_path):
         reader = PdfReader()
         filtered_data = pd.read_excel(open_path)
 
-        length = 3  # len(filtered_data.index)
+        length = len(filtered_data.index)
         for iter_pdf in range(0, length):
             elementos_df = reader.extract_tables(filtered_data.loc[iter_pdf][2])
 
@@ -228,12 +284,129 @@ class WsBot(webdriver.Edge):
             except: pass
 
             count_df = 0
+            list_tables = list()
             for elemento_df in elementos_df:
-                print(f'info: {elemento_df[1]}')
-                print(f'dataframe: {elemento_df[0].head()}')
+                #print(f'info: {elemento_df[1]}')
+                #print(f'dataframe: {elemento_df[0].head()}')
 
                 # save file in the correspondent directory
+                # in_frame = self.filtering_frame(elemento_df[0])
                 if self.filtering_frame(elemento_df[0]):
+                    #print(in_frame)
                     elemento_df[0].to_csv(f'{path}\\{count_df}.csv')
-
+                    elemento_df[0].to_excel(f'{path}\\{count_df}.xlsx')
+                    
+                    # soluçào supervisória, para a generalização do problema
+                    aux_index = 0
+                    in_column = False
+                    for column in list(elemento_df[0].columns):
+                        print(column)
+                        
+                        if str(column).lower().__contains__('atividade'):
+                            in_column = True
+                            break
+                            
+                        aux_index += 1
+                    
+                    if not in_column:
+                        aux_index = 0
+                        
+                    #print(elemento_df[0].columns[aux_index:])
+                    #print(elemento_df[0].loc[:, elemento_df[0].columns[aux_index:]])
+                    list_tables.append(elemento_df[0].loc[:, elemento_df[0].columns[aux_index:]])
+                
                 count_df += 1
+                
+            # executa rotina de normalização dos dados
+            # fica pra depois. Tabom...
+            if len(list_tables) > 0:
+                try:
+                    print(list_tables)
+                    normal_table = self.normalising_frame(list_tables)
+                    normal_table.to_csv(f'{path}\\normal_table.csv')
+                    normal_table.to_excel(f'{path}\\normal_table.xlsx')
+                except:
+                    pass    
+
+    def __regex(self, pattern: str, entry: str):
+        return re.search(pattern, entry)
+
+    def form_menu_system(self, path):
+        filtered_data = pd.read_excel(path)
+        
+        msystem = MenuSystem()
+        count = 0
+        for iteration in range(0, filtered_data.index.size):
+            item = filtered_data.iloc[iteration]
+            #print(item)
+            
+            pattern = '^.*(Chamada Pública).*(([nN]º)?( )?[0-9]{2}\/[0-9]{4})'
+            entry = item.loc['page_context']
+            #print(f'entry = {entry}')
+            
+            match = self.__regex(pattern, entry)     
+            if match is not None:
+                num = match.group()
+                #print(num)
+                
+                title = entry[match.span()[1]:]
+                #print(title)
+            else: num = None
+            
+            pattern = '–(.*$)'
+            match = self.__regex(pattern, entry)     
+            if match is not None:
+                title = match.group().strip('– ')
+                #print(title)
+            else: title = None
+            
+            link = item.loc['link_value']
+            path = None
+            
+            mcontent = MenuContent(num=num,title=title,link=link,path_to=path)
+            try:
+                table = pd.read_csv(f'./scrapping/csv_teste/{iteration}/normal_table.csv')
+                print(table)
+                mcontent.set_cronogram(table)
+            except: pass
+            
+            msystem.insert_item(mcontent)
+        
+        #print(count)
+        
+        msystem.sync_items()
+        return msystem    
+                
+            
+            
+        
+        '''
+        self.require_one = ['atividade', 'fase', 'evento']
+        self.require_extrict = ['data']
+
+        #in_column = [0, 0] # nothing at anywahere
+
+        columns = frame.columns.__str__().lower()
+        has_require_one = list(map(columns.__contains__, self.require_one))
+        #print(has_require_one)
+
+        has_require_extrict = list(map(columns.__contains__, self.require_extrict))
+        #print(has_require_extrict)
+
+        # second routine, if to do search in line 0
+        if(frame.index.size > 0):
+            first_line = frame.iloc[0].to_string().lower()
+
+            if not has_require_one.__contains__(True):
+                has_require_one = list(map(first_line.__contains__, self.require_one))
+                #print(has_require_one)
+            #else: in_column[0] = 1
+
+            if not has_require_extrict.__contains__(True):
+                has_require_extrict = list(map(first_line.__contains__, self.require_extrict))
+                #print(has_require_extrict)  
+            #else: in_column[1] = 1
+
+            return list(has_require_one + has_require_extrict) # [True, True, False, True]
+        '''
+
