@@ -1,0 +1,2 @@
+# Trabalho de Finalização da Etapa I - Relatório 
+Automação do processo de busca de financiamentos para projetos de pesquisa na Fundação de Amparo à Pesquisa do Estado de Goiás (FAPEG). Um robô de software deve acessar o site da FAPEG colher informações sobre editais de financiamentos para projetos de pesquisa. Os seguintes dados devem ser coletados: número da chamada; título; requisitos; temática; principais datas; situação. Outros dados importantes podem ser incluídos. Note que será necessário ler arquivos PDF. 
