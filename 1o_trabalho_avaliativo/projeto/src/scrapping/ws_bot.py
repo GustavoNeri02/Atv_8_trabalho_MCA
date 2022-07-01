@@ -441,7 +441,7 @@ class WsBot(webdriver.Edge):
         msystem.sync_items()
         return msystem    
     
-
+    
     def form_menu_system(self, path):
         try:
             filtered_data = pd.read_csv(path)
